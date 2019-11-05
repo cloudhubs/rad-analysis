@@ -5,7 +5,9 @@ import edu.baylor.ecs.cloudhubs.rad.context.RadResponseContext;
 import edu.baylor.ecs.cloudhubs.rad.service.RestDiscoveryService;
 import edu.baylor.ecs.cloudhubs.radanalysis.context.RadAnalysisRequestContext;
 import edu.baylor.ecs.cloudhubs.radanalysis.context.RadAnalysisResponseContext;
+import edu.baylor.ecs.cloudhubs.radanalysis.context.SecurityContextWrapper;
 import edu.baylor.ecs.seer.common.context.SeerContext;
+import edu.baylor.ecs.seer.common.context.SeerMsContext;
 import edu.baylor.ecs.seer.common.context.SeerRequestContext;
 import edu.baylor.ecs.seer.lweaver.service.SeerContextService;
 import lombok.AllArgsConstructor;
@@ -19,10 +21,18 @@ public class RadAnalysisService {
     private final SeerContextService seerContextService;
 
     public RadAnalysisResponseContext generateRadAnalysisResponseContext(RadAnalysisRequestContext request) {
-        RadResponseContext radResponseContext = generateRadResponseContext(request);
-        SeerContext seerContext = generateSeerContext(request);
+        RadAnalysisResponseContext responseContext = new RadAnalysisResponseContext();
 
-        return new RadAnalysisResponseContext(seerContext, radResponseContext.getRestFlowContext());
+        RadResponseContext radResponseContext = generateRadResponseContext(request);
+        responseContext.setRestFlowContext(radResponseContext.getRestFlowContext());
+
+        SeerContext seerContext = generateSeerContext(request);
+        for (SeerMsContext msContext : seerContext.getMsContexts()) {
+            SecurityContextWrapper securityContextWrapper = new SecurityContextWrapper(msContext.getModuleName(), msContext.getSecurity());
+            responseContext.getSecurityContexts().add(securityContextWrapper);
+        }
+
+        return responseContext;
     }
 
     private RadResponseContext generateRadResponseContext(RadAnalysisRequestContext request) {
