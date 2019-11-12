@@ -8,16 +8,16 @@ import edu.baylor.ecs.cloudhubs.rad.service.RestDiscoveryService;
 import edu.baylor.ecs.cloudhubs.radanalysis.context.RadAnalysisRequestContext;
 import edu.baylor.ecs.cloudhubs.radanalysis.context.RadAnalysisResponseContext;
 import edu.baylor.ecs.seer.common.SeerSecurityNode;
-import edu.baylor.ecs.seer.common.context.SeerContext;
-import edu.baylor.ecs.seer.common.context.SeerMsContext;
 import edu.baylor.ecs.seer.common.context.SeerRequestContext;
 import edu.baylor.ecs.seer.common.context.SeerSecurityContext;
 import edu.baylor.ecs.seer.common.security.SecurityMethod;
 import edu.baylor.ecs.seer.common.security.SecurityRootMethod;
 import edu.baylor.ecs.seer.common.security.SeerSecurityConstraintViolation;
 import edu.baylor.ecs.seer.common.security.SeerSecurityEntityAccessViolation;
+import edu.baylor.ecs.seer.lweaver.service.ResourceService;
 import edu.baylor.ecs.seer.lweaver.service.SeerContextService;
 import edu.baylor.ecs.seer.lweaver.service.SeerMsSecurityContextService;
+import javassist.CtClass;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class RadAnalysisService {
-
+    private final ResourceService resourceService;
     private final RestDiscoveryService restDiscoveryService;
     private final SeerContextService seerContextService;
     private final SeerMsSecurityContextService securityContextService;
@@ -36,18 +36,14 @@ public class RadAnalysisService {
         RadAnalysisResponseContext responseContext = new RadAnalysisResponseContext();
 
         RadResponseContext radResponseContext = generateRadResponseContext(request);
-        // responseContext.setRestFlowContext(radResponseContext.getRestFlowContext());
+        responseContext.setRestFlowContext(radResponseContext.getRestFlowContext());
 
-        SeerContext seerContext = generateSeerContext(request);
-//        for (SeerMsContext msContext : seerContext.getMsContexts()) {
-//            SecurityContextWrapper securityContextWrapper = new SecurityContextWrapper(msContext.getModuleName(), msContext.getSecurity());
-//            responseContext.getSecurityContexts().add(securityContextWrapper);
-//        }
+        List<SeerSecurityContext> securityContexts = generateSeerSecurityContext(request);
 
         // combine security root methods
         Set<SecurityRootMethod> combinedRootMethods = new HashSet<>();
-        for (SeerMsContext msContext : seerContext.getMsContexts()) {
-            combinedRootMethods.addAll(msContext.getSecurity().getSecurityRoots());
+        for (SeerSecurityContext securityContext : securityContexts) {
+            combinedRootMethods.addAll(securityContext.getSecurityRoots());
         }
 
         // build controller to controller flow along with security roles
@@ -123,25 +119,36 @@ public class RadAnalysisService {
     }
 
     private RadResponseContext generateRadResponseContext(RadAnalysisRequestContext request) {
-        return restDiscoveryService.generateRadResponseContext(new RadRequestContext(
-                request.getPathToCompiledMicroservices(),
-                request.getOrganizationPath(),
-                request.getOutputPath()));
+        return restDiscoveryService.generateRadResponseContext(convertToRadRequestContext(request));
     }
 
-    private SeerContext generateSeerContext(RadAnalysisRequestContext request) {
-        // Initialize a new SeerContext with the request
-        SeerContext context = new SeerContext();
+    private List<SeerSecurityContext> generateSeerSecurityContext(RadAnalysisRequestContext request) {
+        List<SeerSecurityContext> securityContexts = new ArrayList<>();
 
+        List<String> resourcePaths = resourceService.getResourcePaths(request.getPathToCompiledMicroservices());
+        for (String path : resourcePaths) {
+            List<CtClass> ctClasses = resourceService.getCtClasses(path, request.getOrganizationPath());
+            SeerRequestContext seerRequestContext = covertToSeerRequestContext(request);
+            SeerSecurityContext securityContext = securityContextService.getMsSeerSecurityContext(ctClasses, seerRequestContext);
+            securityContexts.add(securityContext);
+        }
+
+        return securityContexts;
+    }
+
+    private SeerRequestContext covertToSeerRequestContext(RadAnalysisRequestContext request) {
         SeerRequestContext seerRequestContext = new SeerRequestContext();
         seerRequestContext.setPathToCompiledMicroservices(request.getPathToCompiledMicroservices());
         seerRequestContext.setOrganizationPath(request.getOrganizationPath());
         seerRequestContext.setSecurityAnalyzerInterface(request.getSecurityAnalyzerInterface());
+        return seerRequestContext;
+    }
 
-        context.setRequest(seerRequestContext);
-
-        // Generate the full SeerContext
-        return seerContextService.populateSeerContext(context);
+    private RadRequestContext convertToRadRequestContext(RadAnalysisRequestContext request) {
+        return new RadRequestContext(
+                request.getPathToCompiledMicroservices(),
+                request.getOrganizationPath(),
+                request.getOutputPath());
     }
 
 }
