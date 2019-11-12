@@ -9,6 +9,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SecurityContextWrapper {
-    private String moduleName;
+    private String resourcePath;
     private SeerSecurityContext security;
 }
