@@ -1,9 +1,10 @@
-package edu.baylor.ecs.cloudhubs.radanalysis;
+package edu.baylor.ecs.cloudhubs.radanalysis.service;
 
-import edu.baylor.ecs.cloudhubs.rad.context.RadRequestContext;
-import edu.baylor.ecs.cloudhubs.rad.context.RadResponseContext;
+import edu.baylor.ecs.cloudhubs.rad.context.RequestContext;
+import edu.baylor.ecs.cloudhubs.rad.context.ResponseContext;
 import edu.baylor.ecs.cloudhubs.rad.model.RestEntity;
 import edu.baylor.ecs.cloudhubs.rad.model.RestFlow;
+import edu.baylor.ecs.cloudhubs.rad.service.ResourceService;
 import edu.baylor.ecs.cloudhubs.rad.service.RestDiscoveryService;
 import edu.baylor.ecs.cloudhubs.radanalysis.context.ApiSecurityContext;
 import edu.baylor.ecs.cloudhubs.radanalysis.context.RadAnalysisRequestContext;
@@ -16,26 +17,30 @@ import edu.baylor.ecs.seer.common.security.SecurityMethod;
 import edu.baylor.ecs.seer.common.security.SecurityRootMethod;
 import edu.baylor.ecs.seer.common.security.SeerSecurityConstraintViolation;
 import edu.baylor.ecs.seer.common.security.SeerSecurityEntityAccessViolation;
-import edu.baylor.ecs.seer.lweaver.service.ResourceService;
 import edu.baylor.ecs.seer.lweaver.service.SeerMsSecurityContextService;
 import javassist.CtClass;
-import lombok.AllArgsConstructor;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
 public class RadAnalysisService {
     private final ResourceService resourceService;
     private final RestDiscoveryService restDiscoveryService;
     private final SeerMsSecurityContextService securityContextService;
 
+    public RadAnalysisService() {
+        this.resourceService = new ResourceService(new DefaultResourceLoader());
+        this.restDiscoveryService = new RestDiscoveryService();
+        this.securityContextService = new SeerMsSecurityContextService();
+    }
+
     public RadAnalysisResponseContext generateRadAnalysisResponseContext(RadAnalysisRequestContext request) {
         RadAnalysisResponseContext responseContext = new RadAnalysisResponseContext();
 
-        RadResponseContext radResponseContext = generateRadResponseContext(request);
+        ResponseContext radResponseContext = generateRadResponseContext(request);
         responseContext.setRestFlowContext(radResponseContext.getRestFlowContext());
 
         // generate security contexts for microservices (original algorithm)
@@ -54,8 +59,8 @@ public class RadAnalysisService {
         return responseContext;
     }
 
-    private RadResponseContext generateRadResponseContext(RadAnalysisRequestContext request) {
-        return restDiscoveryService.generateRadResponseContext(convertToRadRequestContext(request));
+    private ResponseContext generateRadResponseContext(RadAnalysisRequestContext request) {
+        return restDiscoveryService.generateResponseContext(convertToRadRequestContext(request));
     }
 
     private List<SecurityContextWrapper> generateSeerSecurityContexts(RadAnalysisRequestContext request) {
@@ -64,7 +69,7 @@ public class RadAnalysisService {
         List<String> resourcePaths = resourceService.getResourcePaths(request.getPathToCompiledMicroservices());
         for (String path : resourcePaths) {
             List<CtClass> ctClasses = resourceService.getCtClasses(path, request.getOrganizationPath());
-            SeerRequestContext seerRequestContext = covertToSeerRequestContext(request);
+            SeerRequestContext seerRequestContext = convertToSeerRequestContext(request);
             SeerSecurityContext securityContext = securityContextService.getMsSeerSecurityContext(ctClasses, seerRequestContext);
             securityContexts.add(new SecurityContextWrapper(path, securityContext));
         }
@@ -155,7 +160,7 @@ public class RadAnalysisService {
         return apiRootMethods;
     }
 
-    private SeerRequestContext covertToSeerRequestContext(RadAnalysisRequestContext request) {
+    private SeerRequestContext convertToSeerRequestContext(RadAnalysisRequestContext request) {
         SeerRequestContext seerRequestContext = new SeerRequestContext();
         seerRequestContext.setPathToCompiledMicroservices(request.getPathToCompiledMicroservices());
         seerRequestContext.setOrganizationPath(request.getOrganizationPath());
@@ -163,8 +168,8 @@ public class RadAnalysisService {
         return seerRequestContext;
     }
 
-    private RadRequestContext convertToRadRequestContext(RadAnalysisRequestContext request) {
-        return new RadRequestContext(
+    private RequestContext convertToRadRequestContext(RadAnalysisRequestContext request) {
+        return new RequestContext(
                 request.getPathToCompiledMicroservices(),
                 request.getOrganizationPath(),
                 request.getOutputPath());

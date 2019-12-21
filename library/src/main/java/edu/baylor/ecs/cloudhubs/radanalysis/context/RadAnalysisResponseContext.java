@@ -1,6 +1,6 @@
 package edu.baylor.ecs.cloudhubs.radanalysis.context;
 
-import edu.baylor.ecs.cloudhubs.rad.context.SeerRestFlowContext;
+import edu.baylor.ecs.cloudhubs.rad.context.RestFlowContext;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +11,6 @@ import java.util.List;
 @Setter
 public class RadAnalysisResponseContext {
     List<SecurityContextWrapper> securityContexts = new ArrayList<>();
-    SeerRestFlowContext restFlowContext;
+    RestFlowContext restFlowContext;
     ApiSecurityContext apiSecurityContext;
 }
