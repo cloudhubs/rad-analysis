@@ -19,6 +19,7 @@ import edu.baylor.ecs.seer.common.security.SeerSecurityConstraintViolation;
 import edu.baylor.ecs.seer.common.security.SeerSecurityEntityAccessViolation;
 import edu.baylor.ecs.seer.lweaver.service.SeerMsSecurityContextService;
 import javassist.CtClass;
+import org.apache.commons.lang.SerializationUtils;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.stereotype.Service;
 
@@ -152,8 +153,10 @@ public class RadAnalysisService {
             }
 
             if (newChildMethods.size() > 0) { // match found
-                rootMethod.setChildMethods(newChildMethods);
-                apiRootMethods.add(rootMethod);
+                // don't modify original root method
+                SecurityRootMethod newRootMethod = (SecurityRootMethod) SerializationUtils.clone(rootMethod);
+                newRootMethod.setChildMethods(newChildMethods);
+                apiRootMethods.add(newRootMethod);
             }
         }
 
