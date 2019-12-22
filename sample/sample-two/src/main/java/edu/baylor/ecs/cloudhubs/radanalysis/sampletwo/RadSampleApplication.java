@@ -1,4 +1,4 @@
-package edu.baylor.ecs.cloudhubs.rad.sampletwo;
+package edu.baylor.ecs.cloudhubs.radanalysis.sampletwo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

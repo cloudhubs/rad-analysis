@@ -1,4 +1,4 @@
-package edu.baylor.ecs.cloudhubs.rad.sampletwo;
+package edu.baylor.ecs.cloudhubs.radanalysis.sampleone;
 
 public class SampleModel {
     Long id;

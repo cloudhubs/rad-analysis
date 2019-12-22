@@ -10,8 +10,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>sample-one</module>
-        <module>sample-two</module>
+        <module>sample/sample-one</module>
+        <module>sample/sample-two</module>
         <module>library</module>
         <module>application</module>
     </modules>
