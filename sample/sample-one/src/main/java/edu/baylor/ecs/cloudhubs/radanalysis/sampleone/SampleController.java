@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.security.RolesAllowed;
+
 @RestController
 @AllArgsConstructor
 @RequestMapping("/sample-one")
@@ -21,6 +23,7 @@ public class SampleController {
         return sampleService.path2();
     }
 
+    @RolesAllowed("user")
     @GetMapping("/p3")
     public SampleModel path3() {
         return sampleService.path3();
