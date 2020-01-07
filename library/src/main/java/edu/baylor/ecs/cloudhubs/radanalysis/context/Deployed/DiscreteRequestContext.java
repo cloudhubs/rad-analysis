@@ -10,6 +10,7 @@ import lombok.ToString;
 @ToString
 @AllArgsConstructor
 public class DiscreteRequestContext {
+    private String dockerImage; // extract JAR if docker image specified
     private String jarPath;
     private String organizationPath;
     private String securityAnalyzerInterface;
