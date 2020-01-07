@@ -22,6 +22,7 @@ class DeployedAnalysisServiceTest {
         String roleHierarchy = "SuperAdmin \n SuperAdmin->Admin \n SuperAdmin->Reviewer \n Admin->User \n User->Guest \n Admin->Moderator";
 
         DiscreteRequestContext discreteRequestContextOne = new DiscreteRequestContext(
+                null,
                 "C:\\Baylor\\RA\\rad-analysis\\sample\\sample-one\\target\\sample-one-0.0.5.jar",
                 "edu/baylor/ecs/cloudhubs/radanalysis/sampleone",
                 roleHierarchy
@@ -29,6 +30,7 @@ class DeployedAnalysisServiceTest {
         DiscreteResponseContext discreteResponseContextOne = deployedAnalysisService.generateDiscreteResponseContext(discreteRequestContextOne);
 
         DiscreteRequestContext discreteRequestContextTwo = new DiscreteRequestContext(
+                null,
                 "C:\\Baylor\\RA\\rad-analysis\\sample\\sample-two\\target\\sample-two-0.0.5.jar",
                 "edu/baylor/ecs/cloudhubs/radanalysis/sampletwo",
                 roleHierarchy
