@@ -10,6 +10,8 @@ import edu.baylor.ecs.cloudhubs.radanalysis.service.DeployedAnalysisService;
 import edu.baylor.ecs.cloudhubs.radanalysis.service.RadAnalysisService;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
 public class Controller {
     private final RadAnalysisService radAnalysisService;
@@ -30,7 +32,14 @@ public class Controller {
     @CrossOrigin(origins = "*")
     @RequestMapping(path = "/discrete", method = RequestMethod.POST, produces = "application/json; charset=UTF-8", consumes = {"text/plain", "application/*"})
     @ResponseBody
-    public DiscreteResponseContext getDiscreteResponseContext(@RequestBody DiscreteRequestContext request) {
+    public DiscreteResponseContext getDiscreteResponseContext(@RequestBody DiscreteRequestContext request) throws IOException {
+        // extract jar and specify jarPath
+        if (request.getDockerImage() != null) {
+            ProcessBuilder pb = new ProcessBuilder("/extract.sh", request.getDockerImage());
+            pb.start();
+
+            request.setJarPath("/target/target.jar");
+        }
         return deployedAnalysisService.generateDiscreteResponseContext(request);
     }
 
