@@ -11,6 +11,7 @@ import edu.baylor.ecs.cloudhubs.radanalysis.service.RadAnalysisService;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -42,6 +43,12 @@ public class Controller {
             runExtractScript(request.getDockerImage());
             request.setJarPath("/target/target.jar");
         }
+
+        // check if jarPath exists
+        if (!new File(request.getJarPath()).exists()) {
+            throw new IOException("JAR path does not exists");
+        }
+
         return deployedAnalysisService.generateDiscreteResponseContext(request);
     }
 
