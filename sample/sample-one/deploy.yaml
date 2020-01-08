@@ -25,6 +25,7 @@ metadata:
   labels:
     app: sample-one
 spec:
+  type: LoadBalancer
   ports:
     - port: 8090
       protocol: TCP
