@@ -22,6 +22,7 @@ ENV JAVA_ALPINE_VERSION 8.111.14-r0
 RUN set -x && apk add --no-cache openjdk8 && [ "$JAVA_HOME" = "$(docker-java-home)" ]
 
 RUN apk add jq
+RUN apk add bash
 
 ADD target/rad-analysis-application-0.0.5.jar rad-analysis.jar
 ADD extract.sh .
@@ -33,7 +34,7 @@ EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "rad-analysis.jar"]
 
-# docker build -t diptadas/rad-cli .
-# docker push diptadas/rad-cli
-# docker run -ti -e TARGET_IMAGE=diptadas/rad-sample -v /var/run/docker.sock:/var/run/docker.sock diptadas/rad-cli
+# docker build -t diptadas/rad-analysis .
+# docker push diptadas/rad-analysis
+# docker run -ti -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock diptadas/rad-analysis
 
