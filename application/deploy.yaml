@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rad-analysis
+spec:
+  selector:
+    matchLabels:
+      app: rad-analysis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: rad-analysis
+    spec:
+      containers:
+        - name: rad-analysis
+          image: diptadas/rad-analysis
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: /var/run/docker.sock
+              name: docker-sock-volume
+      volumes:
+        - name: docker-sock-volume
+          hostPath:
+            path: /var/run/docker.sock
+            type: File
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rad-analysis
+  labels:
+    app: rad-analysis
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      protocol: TCP
+  selector:
+    app: rad-analysis
