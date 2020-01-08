@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-two
+spec:
+  selector:
+    matchLabels:
+      app: sample-two
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: sample-two
+    spec:
+      containers:
+        - name: sample-two
+          image: diptadas/rad-sample-two
+          ports:
+            - containerPort: 8070
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sample-two
+  labels:
+    app: sample-two
+spec:
+  ports:
+    - port: 8070
+      protocol: TCP
+  selector:
+    app: sample-two
