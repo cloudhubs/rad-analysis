@@ -25,6 +25,7 @@ class DeployedAnalysisServiceTest {
                 null,
                 "C:\\Baylor\\RA\\rad-analysis\\sample\\sample-one\\target\\sample-one-0.0.5.jar",
                 "edu/baylor/ecs/cloudhubs/radanalysis/sampleone",
+                "sample-one",
                 roleHierarchy
         );
         DiscreteResponseContext discreteResponseContextOne = deployedAnalysisService.generateDiscreteResponseContext(discreteRequestContextOne);
@@ -33,6 +34,7 @@ class DeployedAnalysisServiceTest {
                 null,
                 "C:\\Baylor\\RA\\rad-analysis\\sample\\sample-two\\target\\sample-two-0.0.5.jar",
                 "edu/baylor/ecs/cloudhubs/radanalysis/sampletwo",
+                "sample-two",
                 roleHierarchy
         );
         DiscreteResponseContext discreteResponseContextTwo = deployedAnalysisService.generateDiscreteResponseContext(discreteRequestContextTwo);

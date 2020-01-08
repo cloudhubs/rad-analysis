@@ -48,7 +48,7 @@ public class DeployedAnalysisService {
                 request.getJarPath(),
                 request.getOrganizationPath(),
                 null
-        ));
+        ), request.getServiceDNS());
 
         List<CtClass> ctClasses = resourceService.getCtClasses(request.getJarPath(), request.getOrganizationPath());
         SeerRequestContext seerRequestContext = convertToSeerRequestContext(request);
