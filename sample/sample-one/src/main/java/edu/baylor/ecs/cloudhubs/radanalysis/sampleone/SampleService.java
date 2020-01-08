@@ -7,7 +7,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class SampleService {
     private final RestTemplate restTemplate;
-    private final String url = "http://localhost:8070/sample-two";
+    private final String url = "http://sample-two:8070/sample-two"; // service name dns
 
     public SampleService(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
