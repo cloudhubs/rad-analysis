@@ -47,10 +47,7 @@ $ git checkout rad-analysis
 Package each microservice.
 
 ```
-$ cd tms-cms && mvn clean install -DskipTests
-$ cd ../tms-ems && mvn clean install -DskipTests
-$ cd ../tms-qms && mvn clean install -DskipTests
-$ cd ../tms-qms && mvn clean install -DskipTests
+$ ./buildAll.sh
 ```
 
 ### Compile and run the application
