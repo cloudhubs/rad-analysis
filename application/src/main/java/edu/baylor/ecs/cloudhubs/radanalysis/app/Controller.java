@@ -4,6 +4,7 @@ import edu.baylor.ecs.cloudhubs.radanalysis.context.Deployed.*;
 import edu.baylor.ecs.cloudhubs.radanalysis.context.RadAnalysisRequestContext;
 import edu.baylor.ecs.cloudhubs.radanalysis.context.RadAnalysisResponseContext;
 import edu.baylor.ecs.cloudhubs.radanalysis.service.DeployedAnalysisService;
+import edu.baylor.ecs.cloudhubs.radanalysis.service.KubeService;
 import edu.baylor.ecs.cloudhubs.radanalysis.service.RadAnalysisService;
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
@@ -32,11 +33,13 @@ import java.util.stream.Collectors;
 public class Controller {
     private final RadAnalysisService radAnalysisService;
     private final DeployedAnalysisService deployedAnalysisService;
+    private final KubeService kubeService;
     private final RestTemplate restTemplate;
 
     public Controller() {
         this.radAnalysisService = new RadAnalysisService();
         this.deployedAnalysisService = new DeployedAnalysisService();
+        this.kubeService = new KubeService();
         this.restTemplate = new RestTemplate();
     }
 
@@ -81,7 +84,7 @@ public class Controller {
         String securityInterface = "SuperAdmin \n SuperAdmin->Admin \n SuperAdmin->Reviewer \n Admin->User \n User->Guest \n Admin->Moderator";
         AnalysisRequestContext analysisRequestContext = getDeployedArtifacts();
 
-        for (DiscreteArtifact artifact : analysisRequestContext.getDiscreteArtifacts()) {
+        for (KubeArtifact artifact : analysisRequestContext.getKubeArtifacts()) {
             DiscreteRequestContext discreteRequestContext = new DiscreteRequestContext(
                     artifact.getImageName(),
                     null,
@@ -108,47 +111,9 @@ public class Controller {
     @RequestMapping(path = "/artifacts", method = RequestMethod.GET, produces = "application/json; charset=UTF-8", consumes = {"text/plain", "application/*"})
     @ResponseBody
     public AnalysisRequestContext getDeployedArtifacts() throws ApiException, IOException {
-        List<DiscreteArtifact> discreteArtifacts = new ArrayList<>();
+        List<KubeArtifact> kubeArtifacts = kubeService.getDeployedArtifacts();
 
-        ApiClient client = Config.defaultClient();
-        Configuration.setDefaultApiClient(client);
-
-        CoreV1Api api = new CoreV1Api();
-        String namespace = "default";
-
-        V1ServiceList svcList = api.listNamespacedService(
-                namespace, null, null, null, null,
-                null, null, null, null, null);
-
-
-        for (V1Service service : svcList.getItems()) {
-            // ignore builtin k8s service
-            if (service.getMetadata().getName().equals("kubernetes") || service.getMetadata().getName().equals("rad-analysis")) {
-                continue;
-            }
-
-            String labelSelector = getLabelSelector(service.getSpec().getSelector());
-
-            V1PodList podList = api.listNamespacedPod(namespace, null, null, null, null,
-                    labelSelector, null, null, null, null);
-
-            for (V1Pod pod : podList.getItems()) {
-                discreteArtifacts.add(new DiscreteArtifact(
-                        service.getMetadata().getName(),
-                        pod.getSpec().getContainers().get(0).getImage()));
-            }
-        }
-
-        return new AnalysisRequestContext(discreteArtifacts);
-    }
-
-    private String getLabelSelector(Map<String, String> selectors) {
-        if (selectors == null) return null;
-
-        String labelSelector = selectors.keySet().stream()
-                .map(key -> key + "=" + selectors.get(key))
-                .collect(Collectors.joining(","));
-        return labelSelector;
+        return new AnalysisRequestContext(kubeArtifacts);
     }
 
     private void runExtractScript(String dockerImage) throws InterruptedException, IOException {

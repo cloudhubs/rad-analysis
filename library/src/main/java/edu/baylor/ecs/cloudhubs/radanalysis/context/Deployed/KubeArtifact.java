@@ -11,7 +11,8 @@ import java.util.List;
 @Setter
 @ToString
 @AllArgsConstructor
-public class DiscreteArtifact {
+public class KubeArtifact {
     private String serviceName;
+    private String podName;
     private String imageName;
 }

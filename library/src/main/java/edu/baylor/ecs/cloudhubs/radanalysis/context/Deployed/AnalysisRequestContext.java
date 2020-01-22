@@ -12,5 +12,5 @@ import java.util.List;
 @ToString
 @AllArgsConstructor
 public class AnalysisRequestContext {
-    private List<DiscreteArtifact> discreteArtifacts;
+    private List<KubeArtifact> kubeArtifacts;
 }
