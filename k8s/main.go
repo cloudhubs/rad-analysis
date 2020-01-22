@@ -40,6 +40,11 @@ func main() {
 	}
 
 	for _, svc := range services.Items {
+		// ignore builtin k8s service
+		if svc.Name == "kubernetes" {
+			continue
+		}
+
 		pods, err := clientset.CoreV1().Pods(namespace).List(metav1.ListOptions{
 			LabelSelector: labels.Set(svc.Spec.Selector).String(),
 		})
