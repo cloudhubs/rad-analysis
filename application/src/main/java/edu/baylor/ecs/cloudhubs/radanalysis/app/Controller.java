@@ -14,6 +14,7 @@ import io.kubernetes.client.models.V1PodList;
 import io.kubernetes.client.models.V1Service;
 import io.kubernetes.client.models.V1ServiceList;
 import io.kubernetes.client.util.Config;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
+@Slf4j
 public class Controller {
     private final RadAnalysisService radAnalysisService;
     private final DeployedAnalysisService deployedAnalysisService;
@@ -71,14 +73,15 @@ public class Controller {
     }
 
     @CrossOrigin(origins = "*")
-    @RequestMapping(path = "/analyse", method = RequestMethod.POST, produces = "application/json; charset=UTF-8", consumes = {"text/plain", "application/*"})
+    @RequestMapping(path = "/analyse", method = RequestMethod.GET, produces = "application/json; charset=UTF-8", consumes = {"text/plain", "application/*"})
     @ResponseBody
-    public CombinedResponseContext getAnalysis(@RequestBody AnalysisRequestContext request) {
+    public CombinedResponseContext getAnalysis() throws IOException, ApiException {
         List<DiscreteResponseContext> discreteResponseContexts = new ArrayList<>();
 
         String securityInterface = "SuperAdmin \n SuperAdmin->Admin \n SuperAdmin->Reviewer \n Admin->User \n User->Guest \n Admin->Moderator";
+        AnalysisRequestContext analysisRequestContext = getDeployedArtifacts();
 
-        for (DiscreteArtifact artifact : request.getDiscreteArtifacts()) {
+        for (DiscreteArtifact artifact : analysisRequestContext.getDiscreteArtifacts()) {
             DiscreteRequestContext discreteRequestContext = new DiscreteRequestContext(
                     artifact.getImageName(),
                     null,
@@ -87,12 +90,16 @@ public class Controller {
                     securityInterface
             );
 
+            log.info(String.valueOf(artifact));
 
             DiscreteResponseContext discreteResponseContext = restTemplate.postForObject(
-                    "192.168.64.2:31553/discrete", request, DiscreteResponseContext.class);
+                    "http://192.168.64.2:31553/discrete", discreteRequestContext, DiscreteResponseContext.class);
+
+
+            log.info(String.valueOf(discreteResponseContext));
+
             discreteResponseContexts.add(discreteResponseContext);
         }
-
 
         return deployedAnalysisService.generateCombinedResponseContext(new CombinedRequestContext(securityInterface, discreteResponseContexts));
     }
@@ -116,10 +123,10 @@ public class Controller {
 
         for (V1Service service : svcList.getItems()) {
             // ignore builtin k8s service
-            if (service.getMetadata().getName().equals("kubernetes")) {
+            if (service.getMetadata().getName().equals("kubernetes") || service.getMetadata().getName().equals("rad-analysis")) {
                 continue;
             }
-            
+
             String labelSelector = getLabelSelector(service.getSpec().getSelector());
 
             V1PodList podList = api.listNamespacedPod(namespace, null, null, null, null,
@@ -128,7 +135,7 @@ public class Controller {
             for (V1Pod pod : podList.getItems()) {
                 discreteArtifacts.add(new DiscreteArtifact(
                         service.getMetadata().getName(),
-                        pod.getSpec().getContainers().get(0).getName()));
+                        pod.getSpec().getContainers().get(0).getImage()));
             }
         }
 
