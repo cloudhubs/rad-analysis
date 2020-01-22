@@ -82,9 +82,9 @@ public class Controller {
         List<DiscreteResponseContext> discreteResponseContexts = new ArrayList<>();
 
         String securityInterface = "SuperAdmin \n SuperAdmin->Admin \n SuperAdmin->Reviewer \n Admin->User \n User->Guest \n Admin->Moderator";
-        AnalysisRequestContext analysisRequestContext = getDeployedArtifacts();
+        List<KubeArtifact> kubeArtifacts = getDeployedArtifacts();
 
-        for (KubeArtifact artifact : analysisRequestContext.getKubeArtifacts()) {
+        for (KubeArtifact artifact : kubeArtifacts) {
             DiscreteRequestContext discreteRequestContext = new DiscreteRequestContext(
                     artifact.getImageName(),
                     null,
@@ -110,10 +110,8 @@ public class Controller {
     @CrossOrigin(origins = "*")
     @RequestMapping(path = "/artifacts", method = RequestMethod.GET, produces = "application/json; charset=UTF-8", consumes = {"text/plain", "application/*"})
     @ResponseBody
-    public AnalysisRequestContext getDeployedArtifacts() throws ApiException, IOException {
-        List<KubeArtifact> kubeArtifacts = kubeService.getDeployedArtifacts();
-
-        return new AnalysisRequestContext(kubeArtifacts);
+    public List<KubeArtifact> getDeployedArtifacts() throws ApiException, IOException {
+        return kubeService.getDeployedArtifacts();
     }
 
     private void runExtractScript(String dockerImage) throws InterruptedException, IOException {
