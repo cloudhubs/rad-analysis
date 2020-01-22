@@ -3,14 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
-	"path/filepath"
-	"time"
-
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	"os"
+	"path/filepath"
 )
 
 func main() {
@@ -33,32 +31,25 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	
-	for {
-		pods, err := clientset.CoreV1().Pods("").List(metav1.ListOptions{})
+
+	namespace := "default"
+
+	services, err := clientset.CoreV1().Services(namespace).List(metav1.ListOptions{})
+	if err != nil {
+		panic(err.Error())
+	}
+
+	for _, svc := range services.Items {
+		pods, err := clientset.CoreV1().Pods(namespace).List(metav1.ListOptions{
+			LabelSelector: labels.Set(svc.Spec.Selector).String(),
+		})
 		if err != nil {
 			panic(err.Error())
 		}
-		fmt.Printf("There are %d pods in the cluster\n", len(pods.Items))
 
-		// Examples for error handling:
-		// - Use helper functions like e.g. errors.IsNotFound()
-		// - And/or cast to StatusError and use its properties like e.g. ErrStatus.Message
-		namespace := "default"
-		pod := "rad-analysis-5db9f97cc5-zg6d2"
-		_, err = clientset.CoreV1().Pods(namespace).Get(pod, metav1.GetOptions{})
-		if errors.IsNotFound(err) {
-			fmt.Printf("Pod %s in namespace %s not found\n", pod, namespace)
-		} else if statusError, isStatus := err.(*errors.StatusError); isStatus {
-			fmt.Printf("Error getting pod %s in namespace %s: %v\n",
-				pod, namespace, statusError.ErrStatus.Message)
-		} else if err != nil {
-			panic(err.Error())
-		} else {
-			fmt.Printf("Found pod %s in namespace %s\n", pod, namespace)
+		for _, pod := range pods.Items {
+			fmt.Println(svc.Name, pod.Name, pod.Spec.Containers[0].Image)
 		}
-
-		time.Sleep(10 * time.Second)
 	}
 }
 
