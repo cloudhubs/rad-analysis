@@ -115,6 +115,11 @@ public class Controller {
 
 
         for (V1Service service : svcList.getItems()) {
+            // ignore builtin k8s service
+            if (service.getMetadata().getName().equals("kubernetes")) {
+                continue;
+            }
+            
             String labelSelector = getLabelSelector(service.getSpec().getSelector());
 
             V1PodList podList = api.listNamespacedPod(namespace, null, null, null, null,
