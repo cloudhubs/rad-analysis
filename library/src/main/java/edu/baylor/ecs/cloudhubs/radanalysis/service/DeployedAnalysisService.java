@@ -26,6 +26,8 @@ import org.apache.commons.lang.SerializationUtils;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,16 +36,20 @@ public class DeployedAnalysisService {
     private final ResourceService resourceService;
     private final RestDiscoveryService restDiscoveryService;
     private final RestFlowService restFlowService;
+    private final DockerService dockerService;
     private final SeerMsSecurityContextService securityContextService;
 
     public DeployedAnalysisService() {
         this.resourceService = new ResourceService(new DefaultResourceLoader());
         this.restDiscoveryService = new RestDiscoveryService();
         this.restFlowService = new RestFlowService();
+        this.dockerService = new DockerService();
         this.securityContextService = new SeerMsSecurityContextService();
     }
 
-    public DiscreteResponseContext generateDiscreteResponseContext(DiscreteRequestContext request) {
+    public DiscreteResponseContext generateDiscreteResponseContext(DiscreteRequestContext request) throws IOException, InterruptedException {
+        prepareJarPath(request);
+
         RestEntityContext restEntityContext = restDiscoveryService.generateRestEntityContext(new RequestContext(
                 request.getJarPath(),
                 request.getOrganizationPath(),
@@ -88,6 +94,19 @@ public class DeployedAnalysisService {
                 restFlowContext,
                 apiSecurityContext
         );
+    }
+
+    private void prepareJarPath(DiscreteRequestContext request) throws IOException, InterruptedException {
+        // extract jar and specify jarPath
+        if (request.getDockerImage() != null) {
+            dockerService.runExtractScript(request.getDockerImage());
+            request.setJarPath("/target/target.jar");
+        }
+
+        // check if jarPath exists
+        if (!new File(request.getJarPath()).exists()) {
+            throw new IOException("JAR path does not exists");
+        }
     }
 
     private ApiSecurityContext generateApiSecurityContext(String roleHierarchy, List<SeerSecurityContext> securityContexts, List<RestFlow> restFlows) {
