@@ -15,6 +15,7 @@ spec:
       containers:
         - name: sample-two
           image: diptadas/rad-sample-two
+          imagePullPolicy: Always
           ports:
             - containerPort: 8070
 ---
