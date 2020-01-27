@@ -9,7 +9,7 @@ import io.kubernetes.client.models.V1Pod;
 import io.kubernetes.client.models.V1PodList;
 import io.kubernetes.client.models.V1Service;
 import io.kubernetes.client.models.V1ServiceList;
-import io.kubernetes.client.util.ClientBuilder;
+import io.kubernetes.client.util.Config;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,8 +22,7 @@ public class KubeService {
     public List<KubeArtifact> getDeployedArtifacts() throws ApiException, IOException {
         List<KubeArtifact> kubeArtifacts = new ArrayList<>();
 
-        // ApiClient client = Config.defaultClient(); // using out-of-cluster config
-        ApiClient client = ClientBuilder.cluster().build(); // using in-cluster config
+        ApiClient client = Config.defaultClient();
         Configuration.setDefaultApiClient(client);
 
         CoreV1Api api = new CoreV1Api();
