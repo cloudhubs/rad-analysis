@@ -25,6 +25,8 @@ minducker diptadas/rad-analysis
 minducker diptadas/rad-sample-one
 minducker diptadas/rad-sample-two
 
+kubectl create rolebinding default-view --clusterrole=view --serviceaccount=default:default || true 
+
 kubectl apply -f application/deploy.yaml
 kubectl apply -f sample/sample-one/deploy.yaml
 kubectl apply -f sample/sample-two/deploy.yaml
