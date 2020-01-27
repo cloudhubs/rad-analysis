@@ -15,7 +15,6 @@ spec:
       containers:
         - name: rad-analysis
           image: diptadas/rad-analysis
-          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           volumeMounts:
