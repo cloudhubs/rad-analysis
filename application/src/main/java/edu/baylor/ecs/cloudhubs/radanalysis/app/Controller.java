@@ -54,17 +54,6 @@ public class Controller {
     @RequestMapping(path = "/discrete", method = RequestMethod.POST, produces = "application/json; charset=UTF-8", consumes = {"text/plain", "application/*"})
     @ResponseBody
     public DiscreteResponseContext getDiscreteResponseContext(@RequestBody DiscreteRequestContext request) throws IOException, InterruptedException {
-        // extract jar and specify jarPath
-        if (request.getDockerImage() != null) {
-            runExtractScript(request.getDockerImage());
-            request.setJarPath("/target/target.jar");
-        }
-
-        // check if jarPath exists
-        if (!new File(request.getJarPath()).exists()) {
-            throw new IOException("JAR path does not exists");
-        }
-
         return deployedAnalysisService.generateDiscreteResponseContext(request);
     }
 
@@ -112,22 +101,5 @@ public class Controller {
     @ResponseBody
     public List<KubeArtifact> getDeployedArtifacts() throws ApiException, IOException {
         return kubeService.getDeployedArtifacts();
-    }
-
-    private void runExtractScript(String dockerImage) throws InterruptedException, IOException {
-        List<String> cmdList = new ArrayList<>();
-        cmdList.add("sh");
-        cmdList.add("/extract.sh");
-        cmdList.add(dockerImage);
-
-        ProcessBuilder pb = new ProcessBuilder(cmdList);
-        Process p = pb.start();
-        p.waitFor();
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            System.out.println(line);
-        }
     }
 }
