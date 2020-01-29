@@ -29,6 +29,7 @@ spec:
   type: LoadBalancer
   ports:
     - port: 8070
+      nodePort: 31552
       protocol: TCP
   selector:
     app: sample-two
