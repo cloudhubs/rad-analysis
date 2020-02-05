@@ -14,7 +14,7 @@ class RadAnalysisServiceTest {
     void generateRadAnalysisResponseContext() {
         RadAnalysisService radAnalysisService = new RadAnalysisService();
         RadAnalysisRequestContext requestContext = new RadAnalysisRequestContext(
-                "..",
+                "../sample",
                 "edu/baylor/ecs/cloudhubs/radanalysis/sample",
                 null,
                 "SuperAdmin \n SuperAdmin->Admin \n SuperAdmin->Reviewer \n Admin->User \n User->Guest \n Admin->Moderator"

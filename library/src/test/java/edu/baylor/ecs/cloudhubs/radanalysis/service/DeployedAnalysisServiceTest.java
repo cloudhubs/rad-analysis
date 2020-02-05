@@ -6,14 +6,17 @@ import edu.baylor.ecs.cloudhubs.radanalysis.context.Deployed.DiscreteRequestCont
 import edu.baylor.ecs.cloudhubs.radanalysis.context.Deployed.DiscreteResponseContext;
 import edu.baylor.ecs.seer.common.security.SeerSecurityConstraintViolation;
 import edu.baylor.ecs.seer.common.security.ViolationType;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Slf4j
 class DeployedAnalysisServiceTest {
 
     @Test
@@ -22,9 +25,11 @@ class DeployedAnalysisServiceTest {
 
         String roleHierarchy = "SuperAdmin \n SuperAdmin->Admin \n SuperAdmin->Reviewer \n Admin->User \n User->Guest \n Admin->Moderator";
 
+        String curPath = Paths.get("..").toAbsolutePath().normalize().toString();
+
         DiscreteRequestContext discreteRequestContextOne = new DiscreteRequestContext(
                 null,
-                "C:\\Baylor\\RA\\rad-analysis\\sample\\sample-one\\target\\sample-one-0.0.5.jar",
+                curPath + "/sample/sample-one/target/sample-one-0.0.5.jar",
                 "edu/baylor/ecs/cloudhubs/radanalysis/sampleone",
                 "sample-one",
                 roleHierarchy
@@ -33,7 +38,7 @@ class DeployedAnalysisServiceTest {
 
         DiscreteRequestContext discreteRequestContextTwo = new DiscreteRequestContext(
                 null,
-                "C:\\Baylor\\RA\\rad-analysis\\sample\\sample-two\\target\\sample-two-0.0.5.jar",
+                curPath + "/sample/sample-two/target/sample-two-0.0.5.jar",
                 "edu/baylor/ecs/cloudhubs/radanalysis/sampletwo",
                 "sample-two",
                 roleHierarchy
