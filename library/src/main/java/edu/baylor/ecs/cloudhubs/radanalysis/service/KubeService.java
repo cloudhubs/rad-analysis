@@ -1,5 +1,6 @@
 package edu.baylor.ecs.cloudhubs.radanalysis.service;
 
+import com.google.common.reflect.TypeToken;
 import edu.baylor.ecs.cloudhubs.radanalysis.context.Deployed.KubeArtifact;
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
@@ -10,13 +11,17 @@ import io.kubernetes.client.models.V1PodList;
 import io.kubernetes.client.models.V1Service;
 import io.kubernetes.client.models.V1ServiceList;
 import io.kubernetes.client.util.Config;
+import io.kubernetes.client.util.Watch;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class KubeService {
 
     public List<KubeArtifact> getDeployedArtifacts() throws ApiException, IOException {
@@ -62,5 +67,31 @@ public class KubeService {
         return selectors.keySet().stream()
                 .map(key -> key + "=" + selectors.get(key))
                 .collect(Collectors.joining(","));
+    }
+
+    public static void watchServices() throws IOException, ApiException {
+        log.info("Starting k8s service watcher");
+
+        ApiClient client = Config.defaultClient();
+        client.getHttpClient().setReadTimeout(0, TimeUnit.SECONDS); // infinite timeout
+        Configuration.setDefaultApiClient(client);
+
+        CoreV1Api api = new CoreV1Api();
+        String namespace = "default";
+
+        Watch<V1Service> watch =
+                Watch.createWatch(
+                        client,
+                        api.listNamespacedServiceCall(namespace, null, null, null, null, null, 5, null, null, Boolean.TRUE, null, null),
+                        new TypeToken<Watch.Response<V1Service>>() {
+                        }.getType());
+
+        try {
+            for (Watch.Response<V1Service> item : watch) {
+                log.info(String.format("%s : Service %s", item.type, item.object.getMetadata().getName()));
+            }
+        } finally {
+            watch.close();
+        }
     }
 }
