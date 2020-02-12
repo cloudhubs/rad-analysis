@@ -1,6 +1,7 @@
 package edu.baylor.ecs.cloudhubs.radanalysis.service;
 
 import com.google.common.reflect.TypeToken;
+import com.squareup.okhttp.Call;
 import edu.baylor.ecs.cloudhubs.radanalysis.context.Deployed.KubeArtifact;
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
@@ -15,6 +16,7 @@ import io.kubernetes.client.util.Watch;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -79,19 +81,14 @@ public class KubeService {
         CoreV1Api api = new CoreV1Api();
         String namespace = "default";
 
-        Watch<V1Service> watch =
-                Watch.createWatch(
-                        client,
-                        api.listNamespacedServiceCall(namespace, null, null, null, null, null, 5, null, null, Boolean.TRUE, null, null),
-                        new TypeToken<Watch.Response<V1Service>>() {
-                        }.getType());
+        Call serviceWatchCall = api.listNamespacedServiceCall(namespace, null, null, null, null, null, 5, null, null, Boolean.TRUE, null, null);
+        Type serviceWatchType = new TypeToken<Watch.Response<V1Service>>() {
+        }.getType();
 
-        try {
+        try (Watch<V1Service> watch = Watch.createWatch(client, serviceWatchCall, serviceWatchType)) {
             for (Watch.Response<V1Service> item : watch) {
                 log.info(String.format("%s : Service %s", item.type, item.object.getMetadata().getName()));
             }
-        } finally {
-            watch.close();
         }
     }
 }
