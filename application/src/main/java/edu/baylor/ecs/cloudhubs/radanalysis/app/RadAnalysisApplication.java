@@ -11,7 +11,10 @@ import java.io.IOException;
 public class RadAnalysisApplication {
 
     public static void main(String[] args) throws IOException, ApiException {
-        KubeService.watchServices();
+        // mvn spring-boot:run -Dspring-boot.run.arguments='--k8s'
+        if (args.length > 0 && args[0].equals("--k8s")) {
+            KubeService.watchServices();
+        }
         SpringApplication.run(RadAnalysisApplication.class, args);
     }
 

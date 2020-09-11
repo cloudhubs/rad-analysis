@@ -184,6 +184,13 @@ curl --request POST \
 }
 ```
 
+### Enable Kubernetes Watcher
+
+```
+$ cd rad-analysis/application
+$ mvn spring-boot:run -Dspring-boot.run.arguments='--k8s'
+```
+
 ## Integrate as library
 
 ### Compile the library
