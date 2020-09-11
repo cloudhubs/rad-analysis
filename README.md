@@ -72,7 +72,7 @@ curl --request POST \
 }'
 ```
 
-```yaml
+```json
 {
 	"securityContexts": [{
 			"resourcePath": "C:\\baylor\\cil-tms\\tms-cms\\target\\cms-0.0.1-SNAPSHOT.jar",
