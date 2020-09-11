@@ -36,17 +36,11 @@ $ mvn clean install -DskipTests
 
 ### Prepare the test bed 
 
-We will use `rad-analysis` branch of [TMS](https://github.com/cloudhubs/tms-testbed/tree/rad-analysis) as our test bed.
+We will use a fork of [TMS](https://github.com/cloudhubs/tms-testbed) as our test bed. Clone and package each microservice into JARs.
 
 ```
 $ git clone https://github.com/cloudhubs/tms-testbed.git
 $ cd tms-testbed
-$ git checkout rad-analysis
-```
-
-Package each microservice into JARs.
-
-```
 $ ./buildAll.sh
 ```
 
