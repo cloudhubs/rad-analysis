@@ -47,6 +47,8 @@ public class DeployedAnalysisService {
         this.securityContextService = new SeerMsSecurityContextService();
     }
 
+    public static Map<String, DiscreteResponseContext> cacheForDockerImage = new HashMap<>();
+
     public DiscreteResponseContext generateDiscreteResponseContext(DiscreteRequestContext request) throws IOException, InterruptedException {
         prepareJarPath(request);
 
@@ -60,11 +62,14 @@ public class DeployedAnalysisService {
         SeerRequestContext seerRequestContext = convertToSeerRequestContext(request);
         SeerSecurityContext securityContext = securityContextService.getMsSeerSecurityContext(ctClasses, seerRequestContext);
 
-        return new DiscreteResponseContext(
+        DiscreteResponseContext response = new DiscreteResponseContext(
                 request.getJarPath(),
                 restEntityContext.getRestEntities(),
                 securityContext
         );
+
+        cacheForDockerImage.put(request.getDockerImage(), response);
+        return response;
     }
 
     public CombinedResponseContext generateCombinedResponseContext(CombinedRequestContext request) {
