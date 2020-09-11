@@ -36,15 +36,15 @@ $ mvn clean install -DskipTests
 
 ### Prepare the test bed 
 
-We will use [CIL-TMS](https://bitbucket.org/cilab/cil-tms/src/master/) (`rad` branch) as our test bed.
+We will use `rad-analysis` branch of [TMS](https://github.com/cloudhubs/tms-testbed/tree/rad-analysis) as our test bed.
 
 ```
-$ git clone https://{username}@bitbucket.org/cilab/cil-tms.git
-$ cd cil-tms
+$ git clone https://github.com/cloudhubs/tms-testbed.git
+$ cd tms-testbed
 $ git checkout rad-analysis
 ```
 
-Package each microservice.
+Package each microservice into JARs.
 
 ```
 $ ./buildAll.sh
