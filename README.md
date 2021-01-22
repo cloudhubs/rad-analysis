@@ -33,6 +33,14 @@ $ cd rad
 $ mvn clean install -DskipTests
 ```
 
+### Prepare the `Seer Common` library
+
+```
+$ git clone https://github.com/cloudhubs/common.git
+$ cd common
+$ mvn clean install -DskipTests
+```
+
 ### Prepare the `Local weaver` library
 
 ```
