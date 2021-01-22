@@ -11,7 +11,7 @@ $ git clone https://github.com/cloudhubs/rad-analysis.git
 ## Major Dependencies
 
 - [RAD](https://github.com/cloudhubs/rad)
-- [Local weaver](https://bitbucket.org/cilab/local-weaver)
+- [Local weaver](https://github.com/cloudhubs/local-weaver)
 - [Spring boot](https://spring.io/projects/spring-boot)
 - [Lombok](https://projectlombok.org/)
 
@@ -25,12 +25,19 @@ $ git clone https://github.com/cloudhubs/rad-analysis.git
 
 ## Run the Application
 
+### Prepare the `RAD` library
+
+```
+$ git clone https://github.com/cloudhubs/rad.git
+$ cd rad
+$ mvn clean install -DskipTests
+```
+
 ### Prepare the `Local weaver` library
 
 ```
-$ git clone https://{username}@bitbucket.org/cilab/local-weaver.git
+$ git clone https://github.com/cloudhubs/local-weaver.git
 $ cd local-weaver
-$ git checkout rest
 $ mvn clean install -DskipTests
 ```
 
